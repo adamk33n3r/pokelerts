@@ -38,6 +38,9 @@ module.exports.bearingToDirection = (brng) ->
 ##############
 # Other stuff #
 ##############
+module.exports.distanceFromMe = (lat, lng) ->
+  return module.exports.haversine lat, lng, settings.lat, settings.lng
+
 cloudscraper.getJSONAsync = (url) ->
   return new Promise (resolve, reject) ->
     cloudscraper.request
