@@ -40,7 +40,9 @@ There are settings in `settings.json`.
 }
 ```
 **api**: Google Geocode API key for searching by address (not needed)
+
 **interval**: How many seconds to wait between checks. Keep this at a minute or
+
 above.
 **blacklist**: You can put IDs of pokemon that you want to filter out of the
 results in here.
