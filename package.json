@@ -7,7 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repoistory": {
+  "repository": {
       "type": "git",
       "url": "https://github.com/adamk33n3r/pokelerts.git"
   },
