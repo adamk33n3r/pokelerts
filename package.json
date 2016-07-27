@@ -1,8 +1,9 @@
 {
   "name": "poke",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Get notified when pokemon you want to catch are nearby.",
+  "main": "index.coffee",
+  "bin": "./bin/pokelerts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

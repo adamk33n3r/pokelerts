@@ -3,8 +3,6 @@
 require 'colors'
 fs = require 'fs'
 moment = require 'moment'
-minimist = require 'minimist'
-args = minimist process.argv.slice 2
 
 search = require './search'
 output = require './output'
@@ -18,28 +16,22 @@ String.prototype.capitalize = () ->
 idToName = (id) ->
   return pokemonNames[id - 1].capitalize()
 
-sortByDistance = (pokemons) ->
-  return pokemons.sort (poke1, poke2) ->
-    poke1Dist = geo.distanceFromMe poke1.latitude, poke1.longitude
-    poke2Dist = geo.distanceFromMe poke2.latitude, poke2.longitude
-    return poke1Dist - poke2Dist
+sortFunctions = {
+  distance: (pokemons) ->
+    return pokemons.sort (poke1, poke2) ->
+      poke1Dist = geo.distanceFromMe poke1.latitude, poke1.longitude
+      poke2Dist = geo.distanceFromMe poke2.latitude, poke2.longitude
+      return poke1Dist - poke2Dist
+  name: (pokemons) ->
+    return pokemons.sort (poke1, poke2) ->
+      return idToName(poke1.pokemonId).localeCompare idToName(poke2.pokemonId)
+  id: (pokemons) ->
+    return pokemons.sort (poke1, poke2) ->
+      return parseInt(poke1.pokemonId) - parseInt(poke2.pokemonId)
+}
 
-sortByName = (pokemons) ->
-  return pokemons.sort (poke1, poke2) ->
-    return idToName(poke1.pokemonId).localeCompare idToName(poke2.pokemonId)
-
-sortByID = (pokemons) ->
-  return pokemons.sort (poke1, poke2) ->
-    return parseInt(poke1.pokemonId) - parseInt(poke2.pokemonId)
-
-if args.n
-  sortFunction = sortByName
-else if args.i
-  sortFunction = sortByID
-else
-  sortFunction = sortByDistance
 pokemonAlerted = []
-main = () ->
+main = (sortFunction, quiet) ->
   search settings.lat, settings.lng
   .then sortFunction
   .then output.printTable
@@ -52,7 +44,7 @@ main = () ->
         feet = Math.round dist * 3.2808
         timeLeft = moment((pokemon.expiration_time * 1000) - now).format('mm:ss')
         message = "#{name} is #{feet}ft away for #{timeLeft}!"
-        if pokemon.uid not in pokemonAlerted
+        if not quiet and pokemon.uid not in pokemonAlerted
           output.notify message
           pokemonAlerted.push pokemon.uid
         output.log message.red.bold
@@ -60,26 +52,32 @@ main = () ->
   .catch (err) ->
     console.error err
 
-
-
-settingsPromise = new Promise (resolve, reject) ->
-  if not settings.lat? or not settings.lng?
-    geo.find().then (location) ->
-      settings.lat = location.lat
-      settings.lng = location.lng
-      fs.writeFileSync 'settings.json', JSON.stringify settings, null, 4
+run = (options = {}) ->
+  options.sort ?= 'distance'
+  options.quiet ?= false
+  sortFunction = sortFunctions[options.sort]
+  settingsPromise = new Promise (resolve, reject) ->
+    if not settings.lat? or not settings.lng?
+      geo.find().then (location) ->
+        settings.lat = location.lat
+        settings.lng = location.lng
+        fs.writeFileSync 'settings.json', JSON.stringify settings, null, 4
+        resolve()
+      .catch (err) ->
+        console.error err
+    else
       resolve()
-    .catch (err) ->
-      console.error err
-  else
-    resolve()
 
-settingsPromise.then () ->
-  console.log 'Searching', "#{settings.lat}, #{settings.lng}"
-  console.log 'If you wish to re-center, delete to lat and long keys from settings.json'
-  console.log 'Blacklisted:'
-  for blacklisted in settings.blacklist
-    console.log "\t#{idToName blacklisted}"
-  console.log 'Press Ctrl-C to exit.'
-  main()
-  setInterval main, settings.interval * 1000
+  settingsPromise.then () ->
+    console.log 'Searching', "#{settings.lat}, #{settings.lng}"
+    console.log 'If you wish to re-center, delete to lat and long keys from settings.json'
+    console.log 'Blacklisted:'
+    for blacklisted in settings.blacklist
+      console.log "\t#{idToName blacklisted}"
+    console.log 'Press Ctrl-C to exit.'
+    main sortFunction, options.quiet
+    setInterval () ->
+      main sortFunction, options.quiet
+    , settings.interval * 1000
+
+module.exports.run = run

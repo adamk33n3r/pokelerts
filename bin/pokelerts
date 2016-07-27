@@ -1,0 +1,16 @@
+#!/usr/bin/env coffee
+
+minimist = require 'minimist'
+args = minimist process.argv.slice 2
+
+options = {}
+if args.n
+  options.sort = 'name'
+else if args.i
+  options.sort = 'id'
+
+if args.q
+  options.quiet = true
+
+pokelerts = require '..'
+pokelerts.run options
