@@ -54,8 +54,9 @@ cloudscraper.getJSONAsync = (url) ->
       if response.headers['content-type'].startsWith 'text/html'
         return reject('site down')
       return resolve(JSON.parse(body))
+
 findLocation = (location) ->
-  return cloudscraper.getJSONAsync "https://maps.googleapis.com/maps/api/geocode/json?address=#{encodeURIComponent(location)}&key=AIzaSyBSQ_1g4yhqoCyRM8qgmK_y1RcZ-ZbVtHI"
+  return cloudscraper.getJSONAsync "https://maps.googleapis.com/maps/api/geocode/json?address=#{encodeURIComponent(location)}&key=#{settings.api}"
     .then (response) ->
       if response.status is 'OK'
         return response.results[0].geometry.location

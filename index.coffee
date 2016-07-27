@@ -58,13 +58,17 @@ run = (options = {}) ->
   sortFunction = sortFunctions[options.sort]
   settingsPromise = new Promise (resolve, reject) ->
     if not settings.lat? or not settings.lng?
-      geo.find().then (location) ->
-        settings.lat = location.lat
-        settings.lng = location.lng
-        fs.writeFileSync 'settings.json', JSON.stringify settings, null, 4
-        resolve()
-      .catch (err) ->
-        console.error err
+      if settings.api
+        geo.find().then (location) ->
+          settings.lat = location.lat
+          settings.lng = location.lng
+          fs.writeFileSync 'settings.json', JSON.stringify settings, null, 4
+          resolve()
+        .catch (err) ->
+          console.error err
+      else
+        console.log 'Either register for a google geocode api key and put it in the settings.json file or manually enter the lat/lng into the settings.json'
+        reject()
     else
       resolve()
 
