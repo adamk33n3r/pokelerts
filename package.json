@@ -1,6 +1,6 @@
 {
   "name": "pokelerts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Get notified when pokemon you want to catch are nearby.",
   "main": "index.coffee",
   "bin": "./bin/pokelerts",
