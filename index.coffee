@@ -58,7 +58,7 @@ main = () ->
         output.log message.red.bold
         output.log "https://www.google.com/maps/dir/#{settings.lat},#{settings.lng}/#{pokemon.latitude},#{pokemon.longitude}".cyan.bold
   .catch (err) ->
-    output.error err
+    console.error err
 
 
 
